@@ -1,0 +1,49 @@
+{
+    "activeFile": "world.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "file.lastUsedOpenFilter": "All Files (*)",
+    "fileStates": {
+        "": {
+            "scaleInDock": 1
+        },
+        "#table": {
+            "scaleInDock": 1
+        },
+        "#walls1": {
+            "scaleInDock": 1
+        },
+        "#walls1_transparent?": {
+            "scaleInEditor": 1
+        },
+        "world.tmx": {
+            "scale": 0.75,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 441.33333333333337,
+                "y": 475.99999999999994
+            }
+        },
+        "world.tmx#table": {
+            "scaleInDock": 1
+        },
+        "world.tmx#walls1": {
+            "scaleInDock": 1
+        }
+    },
+    "last.imagePath": "C:/Users/GooseAdmin/Documents/Projects/Software/LibGDX_Projects/GuardEscape/assets/tileMaps",
+    "map.height": 30,
+    "map.lastUsedFormat": "tmx",
+    "openFiles": [
+        "world.tmx"
+    ],
+    "project": "world.tiled-project",
+    "property.type": "int",
+    "recentFiles": [
+        "world.tmx"
+    ],
+    "tileset.embedInMap": true,
+    "tileset.transparentColor": "#929c9a",
+    "tileset.useTransparentColor": true
+}
