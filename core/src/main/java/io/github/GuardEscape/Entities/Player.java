@@ -1,46 +1,46 @@
 package io.github.GuardEscape.Entities;
 
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 
-public class Player {
+public class Player extends BaseEntity {
 
-    Sprite player;
-    Rectangle hitbox;
-
-    public Player(float initX, float initY) {
-        player = new Sprite(new Texture("tileMaps\\character.png"));
-        player.setPosition(initX, initY);
-        player.setSize(1f, 1f);
-        hitbox = new Rectangle(initX, initY, player.getWidth(), player.getHeight());
+    public Player(String spritePath,
+                  Vector2 dimensions,
+                  Vector2 position,
+                  Vector2 orientation,
+                  float acceleration,
+                  float drag) {
+        super(
+            spritePath,
+            dimensions,
+            position,
+            orientation,
+            acceleration,
+            drag
+        );
     }
 
-    public Sprite getSprite() {
-        return player;
+    @Override
+    public void update(float delta, Array<Rectangle> walls, int maxX, int maxY) {
+        input(delta);
+
+        super.update(delta, walls, maxX, maxY);
     }
 
-    public Rectangle getHitbox() {
-        return hitbox;
+    private void input(float delta) {
+        if (Gdx.input.isKeyPressed(Input.Keys.A))
+            velocity.add(-acceleration * delta, 0f);
+        else if (Gdx.input.isKeyPressed(Input.Keys.D))
+            velocity.add(acceleration * delta, 0f);
+
+        if (Gdx.input.isKeyPressed(Input.Keys.W))
+            velocity.add(0f, acceleration * delta);
+        else if (Gdx.input.isKeyPressed(Input.Keys.S))
+            velocity.add(0f, -acceleration * delta);
     }
-
-    public void translateX(float value) {
-        player.translateX(value);
-        hitbox.setX(player.getX());
-    }
-
-    public void translateY(float value) {
-        player.translateY(value);
-        hitbox.setY(player.getY());
-    }
-
-    public float getX() { return player.getX(); }
-    public float getY() { return player.getY(); }
-    public void setX(float x) { player.setX(x); }
-    public void setY(float y) { player.setY(y); }
-    public void setPosition(float x, float y) { player.setPosition(x, y); }
-
-    public float getWidth() { return player.getWidth(); }
-    public float getHeight() { return player.getHeight(); }
 
 }

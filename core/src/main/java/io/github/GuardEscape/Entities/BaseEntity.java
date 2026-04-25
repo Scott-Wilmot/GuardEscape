@@ -1,47 +1,101 @@
 package io.github.GuardEscape.Entities;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 
 public abstract class BaseEntity {
 
     // Entity logic and rendering
-    Sprite sprite;
-    Rectangle body;
+    protected Sprite sprite;
+    protected Rectangle body;
 
     // Entity body characteristics
-    Vector2 position;
-    Vector2 velocity;
-    Vector2 orientation;
+    protected Vector2 position;
+    protected Vector2 velocity;
+    protected Vector2 orientation;
 
-    float speed;
-    float drag;
+    protected float acceleration;
+    protected float drag;
 
-    public BaseEntity(Sprite sprite,
-                      Rectangle body,
+    public BaseEntity(String spritePath,
+                      Vector2 dimensions,
                       Vector2 position,
                       Vector2 orientation,
                       float speed,
                       float drag)
     {
-        this.sprite = sprite;
-        this.body = body;
+        sprite = generateSprite(spritePath, dimensions, position);
+        body = new Rectangle(position.x, position.y, dimensions.x, dimensions.y);
         this.position = position;
         this.orientation = orientation;
-        this.speed = speed;
+        this.acceleration = speed;
         this.drag = drag;
 
         velocity = new Vector2(0, 0);   // All entities should start with zero speed
     }
 
     public void render(Batch batch) {
+        sprite.setPosition(body.getX(), body.getY());
         sprite.draw(batch);
     }
 
-    public void update(float delta) {
-        sprite.setPosition(body.getX(), body.getY());
+    public void update(float delta, Array<Rectangle> walls, int maxX, int maxY) {
+        velocity.scl(drag);
+
+        // X direction update
+        updateHitbox(velocity.x * delta, 0f);
+        for (Rectangle wall : walls) {
+            if (body.overlaps(wall)) {
+                // Player hitting wall from the left
+                if (velocity.x > 0)
+                    body.setX(wall.getX() - body.getWidth());
+                // Player hitting wall from left
+                else if (velocity.x < 0)
+                    body.setX(wall.getX() + wall.getWidth());
+
+                velocity.x = -velocity.x * 0.5f;
+                position.x = body.x;
+            }
+        }
+
+        // Y direction update
+        updateHitbox(0f, velocity.y * delta);
+        for (Rectangle wall : walls) {
+            if (body.overlaps(wall)) {
+                // Player contacts wall from bottom
+                if (velocity.y > 0)
+                    body.setY(wall.getY() - body.getHeight());
+                // Player contacts wall from top
+                else if (velocity.y < 0)
+                    body.setY(wall.getY() + wall.getHeight());
+
+                velocity.y = -velocity.y * 0.5f;
+                position.y = body.y;
+            }
+        }
+
+        // World bound checks
+        if (body.getX() < 0) {
+            body.setX(0);
+            position.x = 0;
+        }
+        else if (body.getX() > maxX - body.getWidth()) {
+            body.setX(maxX - body.getWidth());
+            position.x = body.getX();
+        }
+
+        if (body.getY() < 0) {
+            body.setY(0);
+            position.y = 0;
+        }
+        else if (body.getY() > maxY - body.getHeight()) {
+            body.setY(maxY - body.getHeight());
+            position.y = body.getY();
+        }
     }
 
     public boolean overlaps(Rectangle wall) {
@@ -51,8 +105,8 @@ public abstract class BaseEntity {
     public void collisionCorrection(Rectangle wall) {
         float hitboxLeft = body.getX();
         float hitboxRight = body.getX() + body.getWidth();
-        float hitboxBottom = wall.getY();
-        float hitboxTop = wall.getY() + body.getHeight();
+        float hitboxBottom = body.getY();
+        float hitboxTop = body.getY() + body.getHeight();
 
         float wallLeft = wall.getX();
         float wallRight = wall.getX() + wall.getWidth();
@@ -71,14 +125,37 @@ public abstract class BaseEntity {
             Math.min(overlapBottom, overlapTop)
         );
 
-        if (minOverlap == overlapLeft)
+        if (minOverlap == overlapLeft) {
             body.setX(wallLeft - body.getWidth());
-        else if (minOverlap == overlapRight)
+            velocity.x = 0f;
+        }
+        else if (minOverlap == overlapRight) {
             body.setX(wallRight);
-        else if (minOverlap == overlapBottom)
+            velocity.x = 0f;
+        }
+        else if (minOverlap == overlapBottom) {
             body.setY(wallBottom - body.getHeight());
-        else if (minOverlap == overlapTop)
+            velocity.y = 0f;
+        }
+        else if (minOverlap == overlapTop) {
             body.setY(wallTop);
+            velocity.y = 0f;
+        }
+    }
+
+    private void updateHitbox(float dx, float dy) {
+        position.x += dx;
+        body.setX(position.x);
+
+        position.y += dy;
+        body.setY(position.y);
+    }
+
+    private Sprite generateSprite(String spritePath, Vector2 dimensions, Vector2 position) {
+        Texture texture = new Texture(spritePath);
+        Sprite sprite = new Sprite(texture);
+        sprite.setSize(dimensions.x, dimensions.y);
+        return sprite;
     }
 
 }
