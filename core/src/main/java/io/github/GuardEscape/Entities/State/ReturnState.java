@@ -50,24 +50,8 @@ public class ReturnState implements State {
 
     @Override
     public void update(Guard guard, float delta) {
-        int guardCellX = (int) guard.getX();
-        int guardCellY = (int) guard.getY();
-
         float diffX = currentTarget.getX() - guard.getX();
         float diffY = currentTarget.getY() - guard.getY();
-
-        // IN CASE OF EMERGENCY (fix deciding to break) BREAK GLASS (uncomment this)
-//        // If guard is not in the currentTarget cell
-//        if (guardCellX != currentTarget.getX() || guardCellY != currentTarget.getY()) {
-//            guard.setOrientation(currentTarget.getX() - guardCellX, currentTarget.getY() - guardCellY);
-//        }
-//        // If guard has reached the current targetCell
-//        else {
-//            System.out.println("GUARD CELL: " + guardCellX + ", " + guardCellY);
-//            System.out.println("DIFF: " + diffX + ", " + diffY);
-//            currentTarget = path.pollLast();
-//            guard.setOrientation(currentTarget.getX(), currentTarget.getY());
-//        }
 
         if (Math.abs(diffX) > 0.1 || Math.abs(diffY) > 0.1) {
             guard.setOrientation(diffX, diffY);

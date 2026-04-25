@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
+import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
@@ -19,6 +20,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
+import io.github.GuardEscape.Entities.BaseEntity;
 import io.github.GuardEscape.Entities.Guard;
 import io.github.GuardEscape.Entities.Player;
 import io.github.GuardEscape.Pathfinding.Node;
@@ -27,42 +29,44 @@ import java.util.HashMap;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class GuardEscape extends ApplicationAdapter {
+
+    // Map and camera objects
     private TiledMap map;
     private OrthogonalTiledMapRenderer renderer;
     private OrthographicCamera camera;
-    private float worldWidth, worldHeight;
+    private Batch batch;
 
+    // Map properties
+    private float worldWidth, worldHeight;
+    private float tileWidth, tileHeight;
+    private float unitScale;
     public Array<Rectangle> wallHitboxes;
     private HashMap<Integer, Node> nodeMap;
 
+    // Entities
+    private Array<BaseEntity> entities;
     private Player player;
     private Guard guard;
-    private Batch batch;
 
-    private final float unitScale = 1 / 32f;
-
+    // Debug
     ShapeRenderer fovRenderer;
 
     @Override
     public void create() {
-        map = new TmxMapLoader().load("tileMaps\\world.tmx");
-        wallHitboxes = new Array<>();
-        nodeMap = new HashMap<>();
-        worldHeight = 30;
-        worldWidth = 30;
+        loadMap("tileMaps\\world.tmx");
         loadObjects();
         loadGraph();
 
         renderer = new OrthogonalTiledMapRenderer(map, unitScale);
-        player = new Player(16, 20);
-        guard = new Guard(20, 20, this, nodeMap.get(Node.getHash(20, 20)));
         batch = renderer.getBatch();
 
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 30, 30);
+        camera.setToOrtho(false, worldWidth, worldHeight);
         camera.update();
-
         batch.setProjectionMatrix(camera.combined);
+
+        player = new Player(16, 20);
+        guard = new Guard(20, 20, this, nodeMap.get(Node.getHash(20, 20)));
 
         fovRenderer = new ShapeRenderer();
         fovRenderer.setProjectionMatrix(camera.combined);
@@ -223,18 +227,30 @@ public class GuardEscape extends ApplicationAdapter {
         fovRenderer.end();
     }
 
-    private Rectangle checkCollisions(Rectangle newRect) {
-        for (Rectangle wall : wallHitboxes) {
-            if (wall.overlaps(newRect)) return wall;
-        }
-        return null;
+    private void loadMap(String mapPath) {
+        map = new TmxMapLoader().load(mapPath);
+        MapProperties properties = map.getProperties();
+
+        worldWidth = properties.get("width", Integer.class);
+        worldHeight = properties.get("height", Integer.class);
+        tileWidth = properties.get("tilewidth", Integer.class);
+        tileHeight = properties.get("tileheight", Integer.class);
+
+        // Check to ensure that the tile pixel width and height are the exact same
+        // If not, unitScale calculation becomes more complicated
+        if (tileWidth == tileHeight)
+            unitScale = 1f / tileHeight;
+        else
+            throw new IllegalArgumentException("ERROR: map .tmx file must have tile size width and height equal!");
     }
 
     /**
-     * Method responsible for loading the object data from a pre-loaded tmx file
-     * Hitboxes of walls and furniture are stored in two seperate arrays, allowing for differing logic between the two
+     * Method responsible for loading the object data from a preloaded tmx file
+     * Hitboxes of walls and furniture are stored in two separate arrays, allowing for differing logic between the two
      */
     private void loadObjects() {
+        wallHitboxes = new Array<>();
+
         MapLayer wallsLayer = map.getLayers().get("WallHitbox");
         MapObjects walls = wallsLayer.getObjects();
 
@@ -250,8 +266,9 @@ public class GuardEscape extends ApplicationAdapter {
     }
 
     // Loading is fucked, calling new Node() destroys any relation, need to load nodes into a HashMap, not Array
-    // Also when populating neighbors you cannot call new Node(), instead access in hashmap based on coorinates and Node.getHash() method
+    // Also when populating neighbors you cannot call new Node(), instead access in hashmap based on coordinates and Node.getHash() method
     private void loadGraph() {
+        nodeMap = new HashMap<>();
         TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get("Wall");
 
         // Get all valid nodes
