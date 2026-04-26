@@ -73,10 +73,18 @@ public class GuardEscape extends ApplicationAdapter {
             new Vector2(20, 20),
             new Vector2(0, 0),
             20f,
-            0.95f
+            0.98f
 
         );
         entities.add(player);
+        entities.add(new Guard(
+            SpritePaths.GUARD_SPRITE,
+            new Vector2(1f, 1f),
+            new Vector2(16f, 16f),
+            new Vector2(0f, 0f),
+            20f,
+            0.98f
+        ));
 
         fovRenderer = new ShapeRenderer();
         fovRenderer.setProjectionMatrix(camera.combined);
