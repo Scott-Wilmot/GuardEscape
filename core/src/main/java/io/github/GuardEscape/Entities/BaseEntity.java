@@ -81,65 +81,24 @@ public abstract class BaseEntity {
         // World bound checks
         if (body.getX() < 0) {
             body.setX(0);
-            position.x = 0;
+            position.x = body.getX();
+            velocity.x = 0f;
         }
         else if (body.getX() > maxX - body.getWidth()) {
             body.setX(maxX - body.getWidth());
             position.x = body.getX();
+            velocity.x = 0f;
         }
 
         if (body.getY() < 0) {
             body.setY(0);
-            position.y = 0;
+            position.y = body.getY();
+            velocity.y = 0;
         }
         else if (body.getY() > maxY - body.getHeight()) {
             body.setY(maxY - body.getHeight());
             position.y = body.getY();
-        }
-    }
-
-    public boolean overlaps(Rectangle wall) {
-        return body.overlaps(wall);
-    }
-
-    public void collisionCorrection(Rectangle wall) {
-        float hitboxLeft = body.getX();
-        float hitboxRight = body.getX() + body.getWidth();
-        float hitboxBottom = body.getY();
-        float hitboxTop = body.getY() + body.getHeight();
-
-        float wallLeft = wall.getX();
-        float wallRight = wall.getX() + wall.getWidth();
-        float wallBottom = wall.getY();
-        float wallTop = wall.getY() + wall.getHeight();
-
-        // Denotes the overlap on the side of the wall being claimed
-        // e.g. "overlapRight" is the overlap on the right side of the wall
-        float overlapLeft = hitboxRight - wallLeft;
-        float overlapRight = wallRight - hitboxLeft;
-        float overlapBottom = hitboxTop - wallBottom;
-        float overlapTop = wallTop - hitboxBottom;
-
-        float minOverlap = Math.min(
-            Math.min(overlapLeft, overlapRight),
-            Math.min(overlapBottom, overlapTop)
-        );
-
-        if (minOverlap == overlapLeft) {
-            body.setX(wallLeft - body.getWidth());
-            velocity.x = 0f;
-        }
-        else if (minOverlap == overlapRight) {
-            body.setX(wallRight);
-            velocity.x = 0f;
-        }
-        else if (minOverlap == overlapBottom) {
-            body.setY(wallBottom - body.getHeight());
-            velocity.y = 0f;
-        }
-        else if (minOverlap == overlapTop) {
-            body.setY(wallTop);
-            velocity.y = 0f;
+            velocity.y = 0;
         }
     }
 
@@ -151,11 +110,26 @@ public abstract class BaseEntity {
         body.setY(position.y);
     }
 
+    public boolean isColliding(BaseEntity entity) {
+        return body.overlaps(entity.getBody());
+    }
+
     private Sprite generateSprite(String spritePath, Vector2 dimensions, Vector2 position) {
         Texture texture = new Texture(spritePath);
         Sprite sprite = new Sprite(texture);
         sprite.setSize(dimensions.x, dimensions.y);
         return sprite;
     }
+
+    public Vector2 getPosition() { return position; }
+    public void setPosition(Vector2 position) { this.position = position; }
+    public Vector2 getVelocity() { return velocity; }
+    public void setVelocity(Vector2 velocity) { this.velocity = velocity; }
+    public Vector2 getOrientation() { return orientation; }
+    public void setOrientation(Vector2 orientation) { this.orientation = orientation; }
+
+    public float getWidth() { return body.getWidth(); }
+    public float getHeight() { return body.getHeight(); }
+    public Rectangle getBody() { return body; }
 
 }

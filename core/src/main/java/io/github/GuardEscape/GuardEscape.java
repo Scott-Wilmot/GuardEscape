@@ -47,7 +47,7 @@ public class GuardEscape extends ApplicationAdapter {
     // Entities
     private Array<BaseEntity> entities;
     private Player player;
-//    private Guard guard;
+    private Guard guard;
 
     // Debug
     ShapeRenderer fovRenderer;
@@ -68,23 +68,22 @@ public class GuardEscape extends ApplicationAdapter {
 
         entities = new Array<>();
         player = new Player(
-            SpritePaths.PLAYER_SPRITE,
-            new Vector2(1f, 1f),
             new Vector2(20, 20),
             new Vector2(0, 0),
-            20f,
-            0.98f
-
+            10f,
+            0.95f
+        );
+        guard = new Guard(
+            this,
+            nodeMap.get(Node.getHash(16, 16)),
+            player,
+            new Vector2(16f, 16f),
+            new Vector2(0f, -1f),
+            10f,
+            0.95f
         );
         entities.add(player);
-        entities.add(new Guard(
-            SpritePaths.GUARD_SPRITE,
-            new Vector2(1f, 1f),
-            new Vector2(16f, 16f),
-            new Vector2(0f, 0f),
-            20f,
-            0.98f
-        ));
+        entities.add(guard);
 
         fovRenderer = new ShapeRenderer();
         fovRenderer.setProjectionMatrix(camera.combined);
@@ -114,9 +113,9 @@ public class GuardEscape extends ApplicationAdapter {
     private void draw() {
         ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
 
+        // Update camera and render Tiled map
         camera.update();
         renderer.setView(camera);
-
         renderer.render();
 
         batch.begin();
@@ -125,6 +124,26 @@ public class GuardEscape extends ApplicationAdapter {
         }
         batch.end();
 
+        Vector2 baseVec = guard.getOrientation().cpy().nor().scl(50);
+        Vector2 bound1 = baseVec.cpy().rotateDeg(60);
+        Vector2 bound2 = baseVec.cpy().rotateDeg(-60);
+        Vector2 guardPos = guard.getPosition();
+
+        fovRenderer.begin(ShapeRenderer.ShapeType.Line);
+        fovRenderer.setColor(Color.RED);
+        fovRenderer.line(
+            guardPos.x + (guard.getWidth() / 2),
+            guardPos.y + (guard.getWidth() / 2),
+            guardPos.x + bound1.x,
+            guardPos.y + bound1.y
+        );
+        fovRenderer.line(
+            guardPos.x + (guard.getWidth() / 2),
+            guardPos.y + (guard.getWidth() / 2),
+            guardPos.x + bound2.x,
+            guardPos.y + bound2.y
+        );
+        fovRenderer.end();
     }
 
     private void loadMap(String mapPath) {
@@ -202,12 +221,8 @@ public class GuardEscape extends ApplicationAdapter {
         }
     }
 
-//    public Node getGuardPosition() {
-//        return nodeMap.get(Node.getHash((int) guard.getX(), (int) guard.getY()));
-//    }
-//    public Node getGuardHome() {
-//        return guard.getHome();
-//    }
+    public Array<Rectangle> getWallHitboxes() { return wallHitboxes; }
+    public HashMap<Integer, Node> getNodeMap() { return nodeMap; }
 
     @Override
     public void dispose() {

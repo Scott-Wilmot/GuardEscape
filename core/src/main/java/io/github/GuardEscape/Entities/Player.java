@@ -5,18 +5,17 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import io.github.GuardEscape.Constants.SpritePaths;
 
 public class Player extends BaseEntity {
 
-    public Player(String spritePath,
-                  Vector2 dimensions,
-                  Vector2 position,
+    public Player(Vector2 position,
                   Vector2 orientation,
                   float acceleration,
                   float drag) {
         super(
-            spritePath,
-            dimensions,
+            SpritePaths.PLAYER_SPRITE,
+            new Vector2(1f, 1f),
             position,
             orientation,
             acceleration,

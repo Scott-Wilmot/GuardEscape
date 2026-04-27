@@ -1,22 +1,40 @@
 package io.github.GuardEscape.Entities.State;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.bullet.collision._btMprSimplex_t;
 import io.github.GuardEscape.Entities.Guard;
 import io.github.GuardEscape.Entities.Player;
 import io.github.GuardEscape.GuardEscape;
 
-public class ChaseState implements State {
+public class ChaseState extends State {
 
-    @Override
-    public State checkTriggers(Guard guard, Player player) {
-        return null;
+    public ChaseState(GuardEscape app, Player player, Guard guard) {
+        super(app, player, guard);
     }
 
     @Override
-    public void update(Guard guard, float delta) {
+    public State checkTriggers() {
+        if (guard.isColliding(player))
+            Gdx.app.exit();
+        else if (!hasLineOfSight()) {
+            return new ReturnState(app, player, guard);
+        }
 
+        return this;
     }
+
+    @Override
+    public void update(float delta) {
+        guard.setOrientation(player.getPosition().cpy().sub(guard.getPosition()));
+
+        Vector2 desiredVelocity = player.getPosition().cpy().sub(guard.getPosition()).nor();
+        Vector2 guardVelocity = guard.getVelocity().nor();
+        Vector2 appliedVelocity = desiredVelocity.cpy().sub(guardVelocity);
+
+        appliedVelocity.limit(0.1f);
+        guard.applyUnitVelocity(appliedVelocity);
+    }
+
 }
