@@ -51,8 +51,11 @@ public class Guard extends BaseEntity {
         super.update(delta, walls, maxX, maxY);
     }
 
-    public void applyUnitVelocity(Vector2 velocity) {
-        this.velocity.add(acceleration * velocity.x, acceleration * velocity.y);
+    public void applyUnitVelocity(Vector2 velocity, float delta) {
+        this.velocity.add(
+            acceleration * velocity.x * delta,
+            acceleration * velocity.y * delta
+        );
     }
 
     public void rotateOrientation(float delta) {

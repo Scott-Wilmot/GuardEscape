@@ -29,15 +29,13 @@ public class ChaseState extends State {
     public void update(float delta) {
         guard.setOrientation(player.getPosition().cpy().sub(guard.getPosition()));
 
-        int STEP_SIZE = 2;
-
+        int STEP_SIZE = 3;
         Vector2 futurePlayerPos = player.getPosition().cpy().add(player.getVelocity().cpy().scl(STEP_SIZE));
-        Vector2 desiredVelocity = futurePlayerPos.sub(guard.getPosition()).nor();
-        Vector2 guardVelocity = guard.getVelocity().cpy().nor();
-        Vector2 appliedVelocity = desiredVelocity.cpy().sub(guardVelocity);
+        Vector2 desiredVelocity = futurePlayerPos.sub(guard.getPosition());
+        Vector2 steeringForce = desiredVelocity.sub(guard.getVelocity());
+        Vector2 appliedVelocity = steeringForce.nor();
 
-//        appliedVelocity.limit(0.3f);
-        guard.applyUnitVelocity(appliedVelocity);
+        guard.applyUnitVelocity(appliedVelocity, delta);
     }
 
 }

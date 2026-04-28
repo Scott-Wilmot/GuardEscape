@@ -44,12 +44,19 @@ public class ReturnState extends State {
         float diffY = currentTarget.getY() - guardPos.y;
 
         if (Math.abs(diffX) > 0.1f || Math.abs(diffY) > 0.1f) {
-            Vector2 desiredVelocity = new Vector2(currentTarget.getX(), currentTarget.getY()).sub(guard.getPosition()).nor();
-            Vector2 guardVelocity = guard.getVelocity().nor();
-            Vector2 appliedVelocity = desiredVelocity.cpy().sub(guardVelocity);
-            appliedVelocity.limit(0.1f);
+            guard.setOrientation(guard.getVelocity());
 
-            guard.applyUnitVelocity(appliedVelocity);
+//            Vector2 desiredVelocity = new Vector2(currentTarget.getX(), currentTarget.getY()).sub(guard.getPosition()).nor();
+//            Vector2 guardVelocity = guard.getVelocity().nor();
+//            Vector2 appliedVelocity = desiredVelocity.cpy().sub(guardVelocity);
+
+            int STEP_SIZE = 1;
+            Vector2 currentTargetPos = new Vector2(currentTarget.getX(), currentTarget.getY());
+            Vector2 desiredVelocity = currentTargetPos.sub(guardPos);
+            Vector2 steeringForce = desiredVelocity.sub(guard.getVelocity());
+            Vector2 appliedVelocity = steeringForce.nor();
+
+            guard.applyUnitVelocity(appliedVelocity, delta);
         }
         else {
             currentTarget = path.pollLast();
