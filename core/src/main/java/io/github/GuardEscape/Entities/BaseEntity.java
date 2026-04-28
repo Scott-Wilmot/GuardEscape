@@ -44,7 +44,8 @@ public abstract class BaseEntity {
     }
 
     public void update(float delta, Array<Rectangle> walls, int maxX, int maxY) {
-        velocity.scl(drag);
+        float deltaDrag = (float) Math.pow(drag, delta);
+        velocity.scl(deltaDrag);
 
         // X direction update
         updateHitbox(velocity.x * delta, 0f);

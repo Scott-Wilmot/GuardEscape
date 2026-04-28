@@ -47,7 +47,6 @@ public class GuardEscape extends ApplicationAdapter {
     // Entities
     private Array<BaseEntity> entities;
     private Player player;
-    private Guard guard;
 
     // Debug
     ShapeRenderer fovRenderer;
@@ -70,20 +69,29 @@ public class GuardEscape extends ApplicationAdapter {
         player = new Player(
             new Vector2(20, 20),
             new Vector2(0, 0),
-            10f,
-            0.95f
+            4f,
+            0.5f
         );
-        guard = new Guard(
+        entities.add(player);
+        entities.add(new Guard(
             this,
             nodeMap.get(Node.getHash(16, 16)),
             player,
             new Vector2(16f, 16f),
             new Vector2(0f, -1f),
-            10f,
-            0.95f
-        );
-        entities.add(player);
-        entities.add(guard);
+            4f,
+            0.5f
+        ));
+//        entities.add(new Guard(
+//            this,
+//            nodeMap.get(Node.getHash(12, 12)),
+//            player,
+//            new Vector2(16f, 16f),
+//            new Vector2(1f, 0f),
+//            4f,
+//            0.5f
+//            )
+//        );
 
         fovRenderer = new ShapeRenderer();
         fovRenderer.setProjectionMatrix(camera.combined);
@@ -124,26 +132,52 @@ public class GuardEscape extends ApplicationAdapter {
         }
         batch.end();
 
-        Vector2 baseVec = guard.getOrientation().cpy().nor().scl(50);
-        Vector2 bound1 = baseVec.cpy().rotateDeg(60);
-        Vector2 bound2 = baseVec.cpy().rotateDeg(-60);
-        Vector2 guardPos = guard.getPosition();
-
         fovRenderer.begin(ShapeRenderer.ShapeType.Line);
-        fovRenderer.setColor(Color.RED);
-        fovRenderer.line(
-            guardPos.x + (guard.getWidth() / 2),
-            guardPos.y + (guard.getWidth() / 2),
-            guardPos.x + bound1.x,
-            guardPos.y + bound1.y
-        );
-        fovRenderer.line(
-            guardPos.x + (guard.getWidth() / 2),
-            guardPos.y + (guard.getWidth() / 2),
-            guardPos.x + bound2.x,
-            guardPos.y + bound2.y
-        );
+        for (BaseEntity entity : entities) {
+            if (!(entity instanceof Guard))
+                continue;
+
+            Vector2 bVec = entity.getOrientation().cpy().nor().scl(50);
+            Vector2 bound1 = bVec.cpy().rotateDeg(60);
+            Vector2 bound2 = bVec.cpy().rotateDeg(-60);
+            Vector2 guardPos = entity.getPosition();
+
+            fovRenderer.setColor(Color.RED);
+            fovRenderer.line(
+                guardPos.x + (entity.getWidth() / 2),
+                guardPos.y + (entity.getWidth() / 2),
+                guardPos.x + bound1.x,
+                guardPos.y + bound1.y
+            );
+            fovRenderer.line(
+                guardPos.x + (entity.getWidth() / 2),
+                guardPos.y + (entity.getWidth() / 2),
+                guardPos.x + bound2.x,
+                guardPos.y + bound2.y
+            );
+        }
         fovRenderer.end();
+
+//        Vector2 baseVec = guard.getOrientation().cpy().nor().scl(50);
+//        Vector2 bound1 = baseVec.cpy().rotateDeg(60);
+//        Vector2 bound2 = baseVec.cpy().rotateDeg(-60);
+//        Vector2 guardPos = guard.getPosition();
+//
+//        fovRenderer.begin(ShapeRenderer.ShapeType.Line);
+//        fovRenderer.setColor(Color.RED);
+//        fovRenderer.line(
+//            guardPos.x + (guard.getWidth() / 2),
+//            guardPos.y + (guard.getWidth() / 2),
+//            guardPos.x + bound1.x,
+//            guardPos.y + bound1.y
+//        );
+//        fovRenderer.line(
+//            guardPos.x + (guard.getWidth() / 2),
+//            guardPos.y + (guard.getWidth() / 2),
+//            guardPos.x + bound2.x,
+//            guardPos.y + bound2.y
+//        );
+//        fovRenderer.end();
     }
 
     private void loadMap(String mapPath) {
